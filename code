@@ -1,0 +1,52 @@
+# Import necessary libraries
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.cluster import KMeans
+
+# Load the dataset
+data = pd.read_csv('Mall_Customers.csv')
+
+# Display first few rows
+print("Sample Data:\n", data.head())
+
+# Select relevant features for clustering
+X = data[['Annual Income (k$)', 'Spending Score (1-100)']]
+
+# Visualize the data distribution
+plt.figure(figsize=(8, 5))
+sns.scatterplot(x='Annual Income (k$)', y='Spending Score (1-100)', data=X)
+plt.title("Customer Distribution by Income and Spending Score")
+plt.show()
+
+# Determine the optimal number of clusters using the Elbow Method
+inertia = []
+K = range(1, 11)
+for k in K:
+    model = KMeans(n_clusters=k, random_state=42)
+    model.fit(X)
+    inertia.append(model.inertia_)
+
+# Plot the Elbow Curve
+plt.figure(figsize=(8, 5))
+plt.plot(K, inertia, 'bo-')
+plt.xlabel('Number of Clusters')
+plt.ylabel('Inertia (WCSS)')
+plt.title('Elbow Method for Optimal k')
+plt.show()
+
+# From the elbow plot, choose optimal clusters (say k=5)
+k_optimal = 5
+kmeans = KMeans(n_clusters=k_optimal, random_state=42)
+clusters = kmeans.fit_predict(X)
+
+# Add cluster info to the original dataset
+data['Cluster'] = clusters
+
+# Visualize the clusters
+plt.figure(figsize=(8, 5))
+sns.scatterplot(x='Annual Income (k$)', y='Spending Score (1-100)',
+                hue='Cluster', palette='Set1', data=data)
+plt.title("Customer Segments")
+plt.legend()
+plt.show()
